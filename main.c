@@ -84,9 +84,16 @@ int main(int argc, char *argv[]) {
             }
 
             case 'D':
-            case 'd':
-                printf("Delete command is not implemented yet.\n");
+            case 'd': {
+                int line;
+                if (sscanf(command + 1, "%d", &line) == 1) {
+                    delete(line);
+                } else {
+                    printf("Usage: D <line>\n");
+                }
                 break;
+            }
+
 
             case 'U':
             case 'u':
