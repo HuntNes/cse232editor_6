@@ -7,7 +7,6 @@ struct node textbuffer[MAX_LINES];
 int free_head = 0;
 int inuse_head = -1;
 
-
 void initialize_buffer() {
     for (int i = 0; i < MAX_LINES; i++) {
         textbuffer[i].prev = -1;
@@ -19,6 +18,19 @@ void initialize_buffer() {
     free_head = 0;
 }
 
+void print_help() {
+    printf("\nAvailable commands:\n");
+    printf("  E <filename>    - Edit file\n");
+    printf("  I <line> <text> - Insert text at line\n");
+    printf("  D <line>        - Delete line\n");
+    printf("  U              - Undo last command\n");
+    printf("  R              - Redo last command\n");
+    printf("  P              - Display text\n");
+    printf("  S <filename>    - Save to file\n");
+    printf("  H              - Show this help\n");
+    printf("  Q              - Quit\n\n");
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Usage: ./cse232editor filename\n");
@@ -28,18 +40,76 @@ int main(int argc, char *argv[]) {
     initialize_buffer();
     edit(argv[1]);
 
-    printf("Editor started. (Commands: Q to quit)\n");
+    printf("Editor started. Type 'H' for help.\n");
 
-    char command[10];
+    char command[256];
     while (1) {
         printf("> ");
-        fgets(command, sizeof(command), stdin);
+        if (!fgets(command, sizeof(command), stdin)) break;
 
-        if (command[0] == 'Q' || command[0] == 'q') {
-            break;
-        }
-        else {
-            printf("Command not recognized yet.\n");
+        
+        command[strcspn(command, "\n")] = 0;
+
+        switch (command[0]) {
+            case 'Q':
+            case 'q':
+                return 0;
+
+            case 'H':
+            case 'h':
+                print_help();
+                break;
+
+            case 'I':
+            case 'i': {
+                int line;
+                char text[MAX_LEN];
+                if (sscanf(command + 1, "%d %[^\n]", &line, text) == 2) {
+                    insert_line(line, text);
+                } else {
+                    printf("Usage: I <line> <text>\n");
+                }
+                break;
+            }
+
+            case 'E':
+            case 'e': {
+                char filename[256];
+                if (sscanf(command + 1, "%s", filename) == 1) {
+                    edit(filename);
+                } else {
+                    printf("Usage: E <filename>\n");
+                }
+                break;
+            }
+
+            case 'D':
+            case 'd':
+                printf("Delete command is not implemented yet.\n");
+                break;
+
+            case 'U':
+            case 'u':
+                printf("Undo command is not implemented yet.\n");
+                break;
+
+            case 'R':
+            case 'r':
+                printf("Redo command is not implemented yet.\n");
+                break;
+
+            case 'P':
+            case 'p':
+                printf("Display command is not implemented yet.\n");
+                break;
+
+            case 'S':
+            case 's':
+                printf("Save command is not implemented yet.\n");
+                break;
+
+            default:
+                printf("Unknown command. Type 'H' for help.\n");
         }
     }
 
