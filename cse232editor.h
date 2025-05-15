@@ -17,5 +17,6 @@ extern int inuse_head;
 void edit(const char *filename);          
 void insert_line(int line, const char *stat); 
 void delete(int line);
-
+void display();
+void save(const char *filename);
 #endif

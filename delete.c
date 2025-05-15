@@ -1,7 +1,7 @@
 
 #include "cse232editor.h"
 #include <string.h>
-
+#include <stdio.h>
 void delete(int line) {
     if (line < 0 || line >= MAX_LINES) {
         printf("Error: Invalid line input!\n");

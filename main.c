@@ -107,12 +107,22 @@ int main(int argc, char *argv[]) {
 
             case 'P':
             case 'p':
-                printf("Display command is not implemented yet.\n");
+                display();
+                
+
                 break;
 
             case 'S':
             case 's':
-                printf("Save command is not implemented yet.\n");
+                {
+                    char filename[256];
+                    if (sscanf(command + 1, "%s", filename) == 1) {
+                        save(filename);
+                    } else {
+                        printf("Usage: S <filename>\n");
+                    }
+                    
+                }
                 break;
 
             default:
