@@ -1,33 +1,53 @@
 
-#include "cse232editor.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
+#include "cse232editor.h"
+
+extern struct node textbuffer[MAX_LINES];
+extern int inuse_head;
+extern int free_head;
+extern int undo_top, redo_top;
+
 void delete(int line) {
-    if (line < 0 || line >= MAX_LINES) {
-        printf("Error: Invalid line input!\n");
+    if (inuse_head == -1) {
+        printf("Error: Buffer is empty.\n");
         return;
     }
-    int prev = textbuffer[line].prev;
-    int next = textbuffer[line].next;
 
-
-    if (line == inuse_head) {
-        inuse_head = next;
+    int idx = inuse_head;
+    int prev = -1;
+    int curr_line = 0;
+    while (idx != -1 && curr_line < line) {
+        prev = idx;
+        idx = textbuffer[idx].next;
+        curr_line++;
+    }
+    if (idx == -1) {
+        printf("Error: Line not found.\n");
+        return;
     }
 
+    // Undo kaydı ekle
+    Operation op;
+    op.type = OP_DELETE;
+    op.line = line;
+    strncpy(op.statement, textbuffer[idx].statement, MAX_LEN);
+    push_undo(op);
+    // Redo stack'i sıfırla
+    redo_top = -1;
 
-    if (prev != -1) {
-        textbuffer[prev].next = next;
-    }
+    // Bağlantıları güncelle
+    if (textbuffer[idx].prev != -1)
+        textbuffer[textbuffer[idx].prev].next = textbuffer[idx].next;
+    else
+        inuse_head = textbuffer[idx].next;
 
+    if (textbuffer[idx].next != -1)
+        textbuffer[textbuffer[idx].next].prev = textbuffer[idx].prev;
 
-    if (next != -1) {
-        textbuffer[next].prev = prev;
-    }
+    // Silinen düğümü free list'e ekle
+    textbuffer[idx].next = free_head;
+    free_head = idx;
 
-
-    textbuffer[line].prev = -1;
-    textbuffer[line].next = free_head;
-    memset(textbuffer[line].statement, 0, MAX_LEN);
-    free_head = line;
+    printf("Line %d deleted.\n", line);
 }

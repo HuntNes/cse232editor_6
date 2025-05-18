@@ -97,12 +97,12 @@ int main(int argc, char *argv[]) {
 
             case 'U':
             case 'u':
-                printf("Undo command is not implemented yet.\n");
+                undo();
                 break;
 
             case 'R':
             case 'r':
-                printf("Redo command is not implemented yet.\n");
+                redo();
                 break;
 
             case 'P':
