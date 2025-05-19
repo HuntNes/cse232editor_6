@@ -9,3 +9,12 @@ cse232editor: main.c edit.c insert.c delete.c save.c display.c undo_redo.c
 clean:
 	rm -f cse232editor
 
+
+libinterface.a: interface.c
+	$(CC) $(CFLAGS) -c interface.c -o interface.o
+	ar rcs libinterface.a interface.o
+
+test: libinterface.a test_interface.c
+	$(CC) $(CFLAGS) -o test_interface test_interface.c -L. -linterface -lncurses
+	./test_interface
+
