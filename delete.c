@@ -27,16 +27,14 @@ void delete(int line) {
         return;
     }
 
-    // Undo kaydı ekle
+
     Operation op;
     op.type = OP_DELETE;
     op.line = line;
     strncpy(op.statement, textbuffer[idx].statement, MAX_LEN);
     push_undo(op);
-    // Redo stack'i sıfırla
     redo_top = -1;
 
-    // Bağlantıları güncelle
     if (textbuffer[idx].prev != -1)
         textbuffer[textbuffer[idx].prev].next = textbuffer[idx].next;
     else
@@ -45,7 +43,7 @@ void delete(int line) {
     if (textbuffer[idx].next != -1)
         textbuffer[textbuffer[idx].next].prev = textbuffer[idx].prev;
 
-    // Silinen düğümü free list'e ekle
+  
     textbuffer[idx].next = free_head;
     free_head = idx;
 
