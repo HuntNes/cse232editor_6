@@ -8,14 +8,14 @@ extern int inuse_head;
 void display()
 {
     initscr();
-    keypad(stdscr, TRUE); // Enable arrow keys
+    keypad(stdscr, TRUE); 
     noecho();
     curs_set(0);
 
     int max_rows, max_cols;
     getmaxyx(stdscr, max_rows, max_cols);
 
-    // Count total lines
+    
     int total_lines = 0;
     int idx = inuse_head;
     while (idx != -1) {
@@ -31,13 +31,13 @@ void display()
         int skip = 0;
         int row = 0;
         int line = 1;
-        // Skip lines before start_line
+        
         while (idx != -1 && skip < start_line) {
             idx = textbuffer[idx].next;
             skip++;
             line++;
         }
-        // Print visible lines
+        
         while (idx != -1 && row < max_rows - 2) {
             mvprintw(row, 0, "%d: %s", line, textbuffer[idx].statement);
             idx = textbuffer[idx].next;

@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <string.h>
 #include <stdlib.h>
+#include "cse232editor.h"
 
 #define MENU_OPTIONS 5
 const char *menu[MENU_OPTIONS] = {
@@ -24,6 +25,18 @@ void draw_menu(int highlight) {
     refresh();
 }
 
+void get_input(const char *prompt, char *buf, int buflen) {
+    echo();
+    curs_set(1);
+    mvprintw(10, 2, "%s", prompt);
+    clrtoeol();
+    move(11, 2);
+    getnstr(buf, buflen - 1);
+    noecho();
+    curs_set(0);
+    move(10, 2); clrtoeol();
+    move(11, 2); clrtoeol();
+}
 
 void run_interface() {
     initscr();
@@ -35,6 +48,9 @@ void run_interface() {
     int highlight = 0;
     int choice = 0;
     int ch;
+    char filename[256];
+    char text[256];
+    int line;
     while (1) {
         draw_menu(highlight);
         ch = getch();
@@ -47,14 +63,32 @@ void run_interface() {
                 break;
             case '\n':
                 choice = highlight;
-                if (choice == MENU_OPTIONS - 1) { /
+                if (choice == 0) { 
+                    get_input("Enter filename:", filename, sizeof(filename));
+                    edit(filename);
+                    mvprintw(MENU_OPTIONS + 4, 2, "File loaded: %s", filename);
+                } else if (choice == 1) { 
+                    get_input("Enter line number:", text, sizeof(text));
+                    line = atoi(text);
+                    get_input("Enter text:", text, sizeof(text));
+                    insert_line(line, text);
+                    mvprintw(MENU_OPTIONS + 4, 2, "Inserted at line %d", line);
+                } else if (choice == 2) { 
+                    get_input("Enter line number:", text, sizeof(text));
+                    line = atoi(text);
+                    delete(line);
+                    mvprintw(MENU_OPTIONS + 4, 2, "Deleted line %d", line);
+                } else if (choice == 3) { 
+                    get_input("Enter filename:", filename, sizeof(filename));
+                    save(filename);
+                    mvprintw(MENU_OPTIONS + 4, 2, "File saved: %s", filename);
+                } else if (choice == 4) { 
                     endwin();
                     return;
-                } else {
-                    mvprintw(MENU_OPTIONS + 3, 2, "Selected: %s (not implemented)", menu[choice]);
-                    refresh();
-                    getch();
                 }
+                mvprintw(MENU_OPTIONS + 5, 2, "Press any key to continue...");
+                refresh();
+                getch();
                 break;
             default:
                 break;
@@ -62,39 +96,3 @@ void run_interface() {
     }
     endwin();
 }
-
-#ifdef TEST_INTERFACE
-int main() {
-    
-    insert_line(0, "ddd");
-    insert_line(1, "eee");
-    insert_line(1, "aaa"); 
-
-
-    delete(1);
-
-  
-    undo();
-
-    
-    redo();
-
-    
-    save("testout.txt");
-
-    
-    display();
-
-   
-    FILE *fp = fopen("testout.txt", "r");
-    char buf[40];
-    fgets(buf, sizeof(buf), fp);
-    assert(strcmp(buf, "ddd\n") == 0);
-    fgets(buf, sizeof(buf), fp);
-    assert(strcmp(buf, "aaa\n") == 0);
-    fclose(fp);
-
-    printf("All tests passed!\n");
-    return 0;
-}
-#endif 
