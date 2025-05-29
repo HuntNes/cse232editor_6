@@ -24,13 +24,13 @@ void insert_line(int line, const char *stat) {
     strncpy(textbuffer[new_idx].statement, stat, MAX_LEN - 1);
     textbuffer[new_idx].statement[MAX_LEN - 1] = '\0';
 
-    // Undo kaydı ekle
+  
     Operation op;
     op.type = OP_INSERT;
     op.line = line;
     strncpy(op.statement, stat, MAX_LEN);
     push_undo(op);
-    // Redo stack'i sıfırla
+ 
     redo_top = -1;
 
     if (inuse_head == -1 || line <= 0) {
