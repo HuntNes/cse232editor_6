@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ncurses.h>
 #include "cse232editor.h"
 
 struct node textbuffer[MAX_LINES];
@@ -18,117 +19,117 @@ void initialize_buffer() {
     free_head = 0;
 }
 
-void print_help() {
-    printf("\nAvailable commands:\n");
-    printf("  E <filename>    - Edit file\n");
-    printf("  I <line> <text> - Insert text at line\n");
-    printf("  D <line>        - Delete line\n");
-    printf("  U              - Undo last command\n");
-    printf("  R              - Redo last command\n");
-    printf("  P              - Display text\n");
-    printf("  S <filename>    - Save to file\n");
-    printf("  H              - Show this help\n");
-    printf("  Q              - Quit\n\n");
+#define MENU_OPTIONS 8
+const char *menu[MENU_OPTIONS] = {
+    "Edit File",
+    "Insert Line",
+    "Delete Line",
+    "Save File",
+    "Display Text",
+    "Undo",
+    "Redo",
+    "Quit"
+};
+
+void draw_menu(int highlight) {
+    clear();
+    mvprintw(0, 0, "CSE232 Editor - ncurses Interface");
+    for (int i = 0; i < MENU_OPTIONS; ++i) {
+        if (i == highlight)
+            attron(A_REVERSE);
+        mvprintw(i + 2, 2, "%s", menu[i]);
+        if (i == highlight)
+            attroff(A_REVERSE);
+    }
+    refresh();
+}
+
+void get_input(const char *prompt, char *buf, int buflen) {
+    echo();
+    curs_set(1);
+    mvprintw(10, 2, "%s", prompt);
+    clrtoeol();
+    move(11, 2);
+    getnstr(buf, buflen - 1);
+    noecho();
+    curs_set(0);
+    move(10, 2); clrtoeol();
+    move(11, 2); clrtoeol();
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        printf("Usage: ./cse232editor filename\n");
-        return 1;
-    }
-
     initialize_buffer();
-    edit(argv[1]);
+    
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0);
 
-    printf("Editor started. Type 'H' for help.\n");
-
-    char command[256];
+    int highlight = 0;
+    int choice = 0;
+    int ch;
+    char filename[256];
+    char text[256];
+    int line;
+    
     while (1) {
-        printf("> ");
-        if (!fgets(command, sizeof(command), stdin)) break;
-
-        
-        command[strcspn(command, "\n")] = 0;
-
-        switch (command[0]) {
-            case 'Q':
-            case 'q':
-                return 0;
-
-            case 'H':
-            case 'h':
-                print_help();
+        draw_menu(highlight);
+        ch = getch();
+        switch (ch) {
+            case KEY_UP:
+                highlight = (highlight - 1 + MENU_OPTIONS) % MENU_OPTIONS;
                 break;
-
-            case 'I':
-            case 'i': {
-                int line;
-                char text[MAX_LEN];
-                if (sscanf(command + 1, "%d %[^\n]", &line, text) == 2) {
-                    insert_line(line, text);
-                } else {
-                    printf("Usage: I <line> <text>\n");
-                }
+            case KEY_DOWN:
+                highlight = (highlight + 1) % MENU_OPTIONS;
                 break;
-            }
-
-            case 'E':
-            case 'e': {
-                char filename[256];
-                if (sscanf(command + 1, "%s", filename) == 1) {
+            case '\n':
+                choice = highlight;
+                if (choice == 0) { 
+                    get_input("Enter filename:", filename, sizeof(filename));
                     edit(filename);
-                } else {
-                    printf("Usage: E <filename>\n");
-                }
-                break;
-            }
-
-            case 'D':
-            case 'd': {
-                int line;
-                if (sscanf(command + 1, "%d", &line) == 1) {
+                    mvprintw(MENU_OPTIONS + 4, 2, "File loaded: %s", filename);
+                } else if (choice == 1) { 
+                    get_input("Enter line number:", text, sizeof(text));
+                    line = atoi(text);
+                    get_input("Enter text:", text, sizeof(text));
+                    insert_line(line, text);
+                    mvprintw(MENU_OPTIONS + 4, 2, "Inserted at line %d", line);
+                } else if (choice == 2) { 
+                    get_input("Enter line number:", text, sizeof(text));
+                    line = atoi(text);
                     delete(line);
-                } else {
-                    printf("Usage: D <line>\n");
+                    mvprintw(MENU_OPTIONS + 4, 2, "Deleted line %d", line);
+                } else if (choice == 3) { 
+                    get_input("Enter filename:", filename, sizeof(filename));
+                    save(filename);
+                    mvprintw(MENU_OPTIONS + 4, 2, "File saved: %s", filename);
+                } else if (choice == 4) {
+                    endwin();
+                    display();
+                    initscr();
+                    cbreak();
+                    noecho();
+                    keypad(stdscr, TRUE);
+                    curs_set(0);
+                } else if (choice == 5) {
+                    undo();
+                    mvprintw(MENU_OPTIONS + 4, 2, "Undo operation completed");
+                } else if (choice == 6) {
+                    redo();
+                    mvprintw(MENU_OPTIONS + 4, 2, "Redo operation completed");
+                } else if (choice == 7) { 
+                    endwin();
+                    return 0;
                 }
+                mvprintw(MENU_OPTIONS + 5, 2, "Press any key to continue...");
+                refresh();
+                getch();
                 break;
-            }
-
-
-            case 'U':
-            case 'u':
-                undo();
-                break;
-
-            case 'R':
-            case 'r':
-                redo();
-                break;
-
-            case 'P':
-            case 'p':
-                display();
-                
-
-                break;
-
-            case 'S':
-            case 's':
-                {
-                    char filename[256];
-                    if (sscanf(command + 1, "%s", filename) == 1) {
-                        save(filename);
-                    } else {
-                        printf("Usage: S <filename>\n");
-                    }
-                    
-                }
-                break;
-
             default:
-                printf("Unknown command. Type 'H' for help.\n");
+                break;
         }
     }
-
+    endwin();
     return 0;
 }
