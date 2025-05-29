@@ -1,21 +1,19 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -g
+
+SRCS = main.c edit.c insert.c delete.c save.c display.c undo_redo.c interface.c
+OBJS = $(SRCS:.c=.o)
 
 all: cse232editor
 
-cse232editor: main.c edit.c insert.c delete.c save.c display.c undo_redo.c
-	$(CC) $(CFLAGS) -o cse232editor main.c edit.c insert.c delete.c save.c display.c undo_redo.c -lncurses
+cse232editor: $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) -lncurses
 
-libinterface.a: interface.c
-	$(CC) $(CFLAGS) -c interface.c -o interface.o
-	ar rcs libinterface.a interface.o
-
-test: libinterface.a test_interface.c
-	$(CC) $(CFLAGS) -o test_interface test_interface.c -L. -linterface -lncurses
-	./test_interface
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f cse232editor test_interface *.o *.a
+	rm -f cse232editor $(OBJS)
 
 
 
