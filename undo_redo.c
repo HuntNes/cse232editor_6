@@ -31,7 +31,7 @@ Operation pop_redo() {
     return empty;
 }
 
-// Prototipler (insert_line ve delete fonksiyonları başka dosyada)
+
 void insert_line(int line, const char *stat);
 void delete(int line);
 
@@ -43,17 +43,17 @@ void undo() {
     Operation op = pop_undo();
     Operation redo_op;
     if (op.type == OP_INSERT) {
-        // Eklenen satırı sil
+      
         delete(op.line);
-        // Redo için tekrar ekleme kaydı
+       
         redo_op.type = OP_INSERT;
         redo_op.line = op.line;
         strncpy(redo_op.statement, op.statement, MAX_LEN);
         push_redo(redo_op);
     } else if (op.type == OP_DELETE) {
-        // Silinen satırı tekrar ekle
+     
         insert_line(op.line, op.statement);
-        // Redo için tekrar silme kaydı
+   
         redo_op.type = OP_DELETE;
         redo_op.line = op.line;
         strncpy(redo_op.statement, op.statement, MAX_LEN);
