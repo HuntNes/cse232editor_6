@@ -18,7 +18,6 @@ int main() {
 
     while (1) {
         clear();
-        // Display buffer
         for (int i = 0; i < MAX_LINES; ++i) {
             if (line_lengths[i] > 0) {
                 mvprintw(i, 0, "%.*s", line_lengths[i], buffer[i]);
@@ -40,7 +39,7 @@ int main() {
             if (x > 0) x--;
         } else if (ch == KEY_RIGHT) {
             if (x < line_lengths[y]) x++;
-        } else if (ch == '\n' || ch == '\r') { // Enter
+        } else if (ch == '\n' || ch == '\r') { 
             if (y < MAX_LINES - 1) {
                 y++;
                 x = 0;
@@ -53,7 +52,7 @@ int main() {
                 line_lengths[y]--;
                 x--;
             }
-        } else if (ch >= 32 && ch <= 126) { // Printable characters
+        } else if (ch >= 32 && ch <= 126) { 
             if (line_lengths[y] < MAX_COLS - 1) {
                 for (int i = line_lengths[y]; i > x; --i) {
                     buffer[y][i] = buffer[y][i - 1];
