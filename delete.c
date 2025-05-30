@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include "cse232editor.h"
@@ -15,10 +14,8 @@ void delete(int line) {
     }
 
     int idx = inuse_head;
-    int prev = -1;
     int curr_line = 0;
     while (idx != -1 && curr_line < line) {
-        prev = idx;
         idx = textbuffer[idx].next;
         curr_line++;
     }

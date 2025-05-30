@@ -5,6 +5,7 @@
 
 extern struct node textbuffer[MAX_LINES];
 extern int inuse_head;
+extern int last_selected_line;
 
 #define MENU_OPTIONS 8
 const char *menu[MENU_OPTIONS] = {
@@ -123,10 +124,13 @@ void run_interface() {
                 if (sscanf(command + 1, "%d %[^\n]", &line, text) == 2) {
                     insert_line(line, text);
                     mvprintw(3, 0, "Inserted at line %d", line);
+                } else if (sscanf(command + 1, " %[^\n]", text) == 1) {
+                    insert_line(last_selected_line, text);
+                    mvprintw(3, 0, "Inserted at last selected line %d", last_selected_line);
                 } else {
-                    mvprintw(3, 0, "Usage: I <line> <text>");
+                    mvprintw(3, 0, "Usage: I <line> <text> or I <text> (inserts at last selected line)");
                 }
-                break;
+             break;
 
             case 'D':
             case 'd':
@@ -134,7 +138,8 @@ void run_interface() {
                     delete(line);
                     mvprintw(3, 0, "Deleted line %d", line);
                 } else {
-                    mvprintw(3, 0, "Usage: D <line>");
+                    delete(last_selected_line);
+                    mvprintw(3, 0, "Deleted last selected line %d", last_selected_line);
                 }
                 break;
 
@@ -179,7 +184,7 @@ void run_interface() {
             default:
                 mvprintw(3, 0, "Unknown command. Type 'H' for help menu");
         }
-        mvprintw(4, 0, "Press any key to continue...");
+        mvprintw(12, 0, "Press any key to continue...");
         refresh();
         getch();
     }
